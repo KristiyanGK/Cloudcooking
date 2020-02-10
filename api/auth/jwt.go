@@ -1,8 +1,6 @@
 package auth
 import (
 	"strconv"
-	"log"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"net/http"
@@ -26,18 +24,6 @@ func extractToken(r *http.Request) string {
 	}
 	
 	return ""
-}
-
-//Pretty display the claims licely in the terminal
-func pretty(data interface{}) {
-	b, err := json.MarshalIndent(data, "", " ")
-
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	fmt.Println(string(b))
 }
 
 // CreateToken creates a jwt token
@@ -87,7 +73,7 @@ func ExtractTokenID(r *http.Request) (uint32, error) {
 func TokenValid(r *http.Request) error {
 	tokenString := extractToken(r)
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
@@ -97,10 +83,6 @@ func TokenValid(r *http.Request) error {
 
 	if err != nil {
 		return err
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		pretty(claims)
 	}
 
 	return nil
