@@ -7,7 +7,7 @@ type Recipe struct {
 	Description string 
 	UsedProducts string 
 	Picture string
-	CookingTime int
+	cookingTime int
 	UserID uint
 	CategoryID uint
 	Category Category
