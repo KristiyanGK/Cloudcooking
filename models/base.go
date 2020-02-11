@@ -1,10 +1,6 @@
 package models
 
-import (
-	"github.com/jinzhu/gorm"
-)
-
 // BaseModel is the base model for all models
 type BaseModel struct {
-	gorm.Model
+	ID uint `gorm:"primary_key"`
 }

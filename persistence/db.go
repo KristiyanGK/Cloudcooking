@@ -7,6 +7,7 @@ import (
 	"github.com/KristiyanGK/cloudcooking/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres" //postgres database driver
+	_ "github.com/jinzhu/gorm/dialects/mysql"    //mysql database driver
 )
 
 var db *gorm.DB
@@ -17,6 +18,8 @@ func InitializeDb(driver, host, port, user, password, name string) {
 
 	if driver == "postgres" {
 		connectionString = fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", host, port, user, name, password)
+	} else if driver == "mysql" {
+		connectionString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", user, password, host, port, name)
 	} else {
 		log.Fatal("Unsupported db driver!")
 	}
@@ -28,6 +31,8 @@ func InitializeDb(driver, host, port, user, password, name string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	db.LogMode(true)
 
 	db.AutoMigrate(
 		&models.User{},

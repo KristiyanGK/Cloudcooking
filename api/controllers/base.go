@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"github.com/go-chi/chi"
+	"github.com/KristiyanGK/cloudcooking/stores/contracts"
 	"github.com/go-playground/locales/en"
 	"github.com/KristiyanGK/cloudcooking/persistence/seeder"
-	"github.com/KristiyanGK/cloudcooking/persistence/stores"
+	"github.com/KristiyanGK/cloudcooking/stores"
 	"github.com/go-playground/validator/v10"
 	ut "github.com/go-playground/universal-translator"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
-	"github.com/gorilla/mux"
 	"net/http"
 	"github.com/KristiyanGK/cloudcooking/persistence"
 	"os"
@@ -17,8 +18,9 @@ import (
 
 // App is struct for application 
 type App struct {
-	Router *mux.Router
-	RecipeStore *stores.RecipeStore
+	Router *chi.Mux
+	RecipeStore contracts.IRecipeStore
+	UserStore contracts.IUserStore
 	Validator  *validator.Validate
 	Translator ut.Translator
 }
@@ -35,11 +37,12 @@ func (a *App) Init() {
 
 	a.initValidator()
 	
-	a.Router = mux.NewRouter()
+	a.Router = chi.NewRouter()
 
 	a.RegisterRoutes()
 
 	a.RecipeStore = stores.NewRecipeStore()
+	a.UserStore = stores.NewUserStore()
 }
 
 //Run starts the rest api server

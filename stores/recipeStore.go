@@ -8,6 +8,7 @@ import (
 )
 
 // RecipeStore is a store for recipes
+// Implements contracts/IRecipeStore
 type RecipeStore struct {
 	db *gorm.DB
 }
@@ -36,22 +37,19 @@ func (rs *RecipeStore) AddRecipe(recipe models.Recipe) models.Recipe {
 // GetRecipeByID finds recipe by given id and returns it.
 // Returns error if not found
 func (rs *RecipeStore) GetRecipeByID(id uint) (models.Recipe, error) {
-	var recipeResult *models.Recipe
+	var recipeResult models.Recipe
 
 	if err := rs.db.Where("id = ?", id).First(&recipeResult).Error; err != nil {
 		return models.Recipe{}, fmt.Errorf("Recipe with id: %d not found", id)
 	}
 
-	return *recipeResult, nil
+	return recipeResult, nil
 }
 
 //DeleteRecipeByID deletes recipe by given id from store
 //Returns error if recipe is not found
 func (rs *RecipeStore) DeleteRecipeByID(id uint) error {
-
-	rs.db.Where("id = ?", id).Delete(&models.Recipe{})
-
-	if err := rs.db.Where("id = ?", id).Delete(&models.Recipe{}).Error; err != nil {
+	if rowsAffected := rs.db.Delete(&models.Recipe{BaseModel: models.BaseModel{ID: id}}).RowsAffected; rowsAffected <= 0 {
 		return fmt.Errorf("Recipe with id: %d not found", id)
 	}
 
@@ -62,7 +60,7 @@ func (rs *RecipeStore) DeleteRecipeByID(id uint) error {
 // Return error if recipe not found
 func (rs *RecipeStore) UpdateRecipeByID(id uint, newRecipe models.Recipe) error {
 
-	var oldRecipe *models.Recipe
+	var oldRecipe models.Recipe
 
 	if err := rs.db.Where("id = ?", id).First(&oldRecipe).Error; err != nil {
 		return fmt.Errorf("Recipe with id: %d not found", id)
