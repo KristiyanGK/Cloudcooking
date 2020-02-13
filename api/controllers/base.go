@@ -23,6 +23,7 @@ type App struct {
 	UserStore contracts.IUserStore
 	Validator  *validator.Validate
 	Translator ut.Translator
+	APISecret string
 }
 
 //Init initiates the app
@@ -32,6 +33,8 @@ func (a *App) Init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+	a.APISecret = os.Getenv("API_SECRET")
 
 	initDb()
 

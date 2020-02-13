@@ -1,26 +1,15 @@
 package auth
 
 import (
+	"fmt"
 	"time"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/KristiyanGK/cloudcooking/models"
-	"os"
 )
 
-/*
-	ID uint
-	Username string
-	Email string
-	Picture string
-	Role string
-	jwt.StandardClaims
-*/
-
-var secret = os.Getenv("API_SECRET")
-
 // GenerateToken generates a jwt token and returns it
-func GenerateToken(user models.User) string {
-	expirationTime := time.Now().Add(24 * time.Hour)
+func GenerateToken(secret string, user models.User) string {
+	expirationTime := time.Now().Add(1 * time.Hour)
 
 	claims := &models.UserToken {
 		ID: user.ID,
@@ -35,7 +24,11 @@ func GenerateToken(user models.User) string {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, _ := token.SignedString(secret)
+	tokenString, err := token.SignedString([]byte(secret))
+
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	return tokenString
 }

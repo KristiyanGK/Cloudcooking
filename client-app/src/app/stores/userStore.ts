@@ -18,12 +18,40 @@ export default class UserStore {
     }
 
     @action login = async (values: IUserFormValues) => {
-        const user = await agent.User.login(values);
-        runInAction(() => {
-            this.user = user;
-        })
-        this.rootStore.commonStore.setToken(user.token);
-        history.push('/home')
+        try {
+            const user = await agent.User.login(values);
+            runInAction(() => {
+                this.user = user;
+            })
+            this.rootStore.commonStore.setToken(user.token);
+            this.rootStore.modalStore.closeModal();
+            history.push('/recipes')
+        } catch(error) {
+            throw error;
+        }
+        
+    }
+
+    @action register = async (values: IUserFormValues) => {
+        try {
+            const user = await agent.User.register(values);
+            this.rootStore.commonStore.setToken(user.token);
+            this.rootStore.modalStore.closeModal();
+            history.push('/recipes')
+        } catch(error) {
+            throw error;
+        }
+    }
+
+    @action getUser = async () => {
+        try {
+            const user = await agent.User.current();
+            runInAction(() => {
+                this.user = user;
+            })
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     @action logout = () => {

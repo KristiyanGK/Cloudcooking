@@ -7,6 +7,7 @@ import (
 // RegisterRoutes registers routes of the app
 func (a *App) RegisterRoutes() {
 	a.Router.Post("/api/login", a.Login)
+	a.Router.Post("/api/register", a.Register)
 
 	a.Router.Route("/api/recipes", func(r chi.Router) {
 		r.Get("/", a.ListRecipes)

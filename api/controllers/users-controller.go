@@ -2,11 +2,15 @@ package controllers
 
 import (
 	"github.com/KristiyanGK/cloudcooking/api/auth"
+	"github.com/KristiyanGK/cloudcooking/api/utils"
 	"encoding/json"
 	"net/http"
 	uvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/users"
 )
 
+// Register receives username, password, email, RepeatPassword
+// If the credentials are valid 
+// Returns a jwt token via authentication header 
 func (a *App) Register(w http.ResponseWriter, r *http.Request) {
 	var registerInfo uvm.UserRegisterVM
 
@@ -19,8 +23,26 @@ func (a *App) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//TODO validate user data
+
+	registerInfo.Password, err = utils.HashPassword(registerInfo.Password)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not register user")
+		return
+	}
+
+	_, err = a.UserStore.AddUser(registerInfo)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Registered!"))
 }
 
+// Login receives username and password and logs in the user if the credentials are valid
+// Returns a jwt token via authentication header 
 func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 	var loginInfo uvm.UserLoginVM
 
@@ -32,9 +54,11 @@ func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//TODO validate user data
+
 	user := a.UserStore.GetUserByUsername(loginInfo.Username)
 
-	token := auth.GenerateToken(user)
+	token := auth.GenerateToken(a.APISecret, user)
 
 	w.Header().Set("Authorization", "Bearer " + token)
 	w.WriteHeader(http.StatusOK)

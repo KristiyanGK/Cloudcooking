@@ -19,10 +19,10 @@ type User struct {
 
 //UserToken is user info in token
 type UserToken struct {
-	ID uint
-	Username string
-	Email string
-	Picture string
-	Role string
+	ID uint `json:"userid"`
+	Username string `json:"username"`
+	Email string `json:"email"`
+	Picture string `json:"picture"`
+	Role string `json:"userRole"`
 	jwt.StandardClaims
 }

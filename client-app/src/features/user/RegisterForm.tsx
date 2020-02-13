@@ -9,27 +9,33 @@ import { combineValidators, isRequired } from 'revalidate';
 import ErrorMessage from '../../app/common/form/ErrorMessage';
 
 const validate = combineValidators({
+    username: isRequired('username'),
     email: isRequired('email'),
     password: isRequired('password')
 })
 
-const LoginForm = () => {
+const RegisterForm = () => {
     const rootStore = useContext(RootStoreContext);
-    const { login } = rootStore.userStore;
+    const { register } = rootStore.userStore;
 
     return (
         <FinalForm
-            onSubmit={(values: IUserFormValues) => login(values).catch(error => ({
+            onSubmit={(values: IUserFormValues) => register(values).catch(error => ({
                 [FORM_ERROR]: error
             }))}
             validate={validate}
             render={({ handleSubmit, submitting, submitError, invalid, pristine, dirtySinceLastSubmit }) => (
                 <Form onSubmit={handleSubmit} error>
-                    <Header as='h2' content='Login to Cloudcooking' color='teal' textAlign='center'/>
+                    <Header as='h2' content='Sign up to Cloudcooking' color='teal' textAlign='center'/>
                     <Field
                         name='email'
                         component={TextInput}
                         placeholder='Email'
+                    />
+                    <Field
+                        name='username'
+                        component={TextInput}
+                        placeholder='Username'
                     />
                     <Field
                         name='password'
@@ -40,11 +46,11 @@ const LoginForm = () => {
                     {submitError && !dirtySinceLastSubmit && (
                         <ErrorMessage error={submitError} text='Invalid email or password'/>
                     )}
-                    <Button disabled={invalid && !dirtySinceLastSubmit || pristine} loading={submitting} color='teal' content='Login' fluid />
+                    <Button disabled={invalid && !dirtySinceLastSubmit} loading={submitting} color='teal' content='Register' fluid />
                 </Form>
             )}
         />
     );
 };
 
-export default LoginForm
+export default RegisterForm

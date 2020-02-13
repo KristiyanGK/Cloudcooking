@@ -32,8 +32,6 @@ func InitializeDb(driver, host, port, user, password, name string) {
 		log.Fatal(err)
 	}
 
-	db.LogMode(true)
-
 	db.AutoMigrate(
 		&models.User{},
 		&models.Role{},

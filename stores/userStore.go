@@ -1,10 +1,11 @@
 package stores
 
 import (
-	"fmt"
+	uvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/users"
 	"github.com/KristiyanGK/cloudcooking/models"
 	"github.com/KristiyanGK/cloudcooking/persistence"
 	"github.com/jinzhu/gorm"
+	"database/sql"
 )
 
 // UserStore is a store for users
@@ -18,55 +19,33 @@ func NewUserStore() *UserStore {
 	return &UserStore{persistence.GetDb()}
 }
 
+// AddUser adds new user to the store and returns it
+// If the user already exists returns error
+func (us *UserStore) AddUser(registerInfo uvm.UserRegisterVM) (models.User, error) {
+	user := models.User{}
+
+	us.db.Where("name = ?", "homecook").First(&user.Role)
+
+	user.Email = registerInfo.Email
+	user.Password = registerInfo.Password
+	user.Username = registerInfo.Username
+
+	us.db.Create(&user)
+
+	return user, nil
+}
+
+// GetUserByUsername receives a username a finds the user by it
 func (us *UserStore) GetUserByUsername(username string) models.User {
 	var user models.User
 
-	query := `
-		SELECT u.id, u.username, u.email, u.picture, r.id, r.name
-		FROM users AS u
-		INNER JOIN roles AS r ON u.role_id = r.id
-		WHERE u.username = ?
-	`
+	row := us.db.Table("users AS u").Select("u.id, u.username, u.email, u.picture, r.name").Joins("JOIN roles AS r ON u.role_id = r.id").Where("u.username = ?", username).Row()
 
-	rows, err := us.db.DB().Query(query, username)
+	var picture sql.NullString
 
-	if err != nil {
-		fmt.Println(err)
-	}
+	row.Scan(&user.ID,&user.Username,&user.Email,&picture,&user.Role.Name)
 
-	/*
-	SELECT r.id, r.name
-		FROM users AS u
-		JOIN roles AS r ON u.role_id = r.id
-		WHERE u.username = ?
-	*/
-	//u.id, u.username, u.email, u.picture, 
-	//uid, u, email, picture,
-	//&uid,&u,&email,&picture,
-
-	var uid, u, email, picture, rid, name string
-
-	for rows.Next() {
-		rows.Scan(&uid,&u,&email,&picture,&rid,&name)
-	}
-
-	// rows, err := us.db.DB().Query(query, username)
-
-	// rows, err := us.db.Table("users").Joins("left join roles on roles.id = users.role_id").Where("users.username=?", username).Rows()
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// defer rows.Close()
-
-	// for rows.Next() {
-	// 	rows.Scan(&user.ID, &user.Username, &user.Email, &user.Picture, &role.ID, &role.Name)
-	// }
-
-	//var role models.Role
-	
-	//us.db.Where("username = ?", username).First(&user)
+	user.Picture = picture.String
 
 	return user
 }
