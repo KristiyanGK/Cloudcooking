@@ -36,11 +36,11 @@ func (rs *RecipeStore) AddRecipe(recipe models.Recipe) models.Recipe {
 
 // GetRecipeByID finds recipe by given id and returns it.
 // Returns error if not found
-func (rs *RecipeStore) GetRecipeByID(id uint) (models.Recipe, error) {
+func (rs *RecipeStore) GetRecipeByID(id models.ModelID) (models.Recipe, error) {
 	var recipeResult models.Recipe
 
 	if err := rs.db.Where("id = ?", id).First(&recipeResult).Error; err != nil {
-		return models.Recipe{}, fmt.Errorf("Recipe with id: %d not found", id)
+		return models.Recipe{}, fmt.Errorf("Recipe with id: %s not found", id)
 	}
 
 	return recipeResult, nil
@@ -48,9 +48,9 @@ func (rs *RecipeStore) GetRecipeByID(id uint) (models.Recipe, error) {
 
 //DeleteRecipeByID deletes recipe by given id from store
 //Returns error if recipe is not found
-func (rs *RecipeStore) DeleteRecipeByID(id uint) error {
+func (rs *RecipeStore) DeleteRecipeByID(id models.ModelID) error {
 	if rowsAffected := rs.db.Delete(&models.Recipe{BaseModel: models.BaseModel{ID: id}}).RowsAffected; rowsAffected <= 0 {
-		return fmt.Errorf("Recipe with id: %d not found", id)
+		return fmt.Errorf("Recipe with id: %s not found", id)
 	}
 
 	return  nil
@@ -58,12 +58,12 @@ func (rs *RecipeStore) DeleteRecipeByID(id uint) error {
 
 // UpdateRecipeByID updates a given recipe by id with new fields
 // Return error if recipe not found
-func (rs *RecipeStore) UpdateRecipeByID(id uint, newRecipe models.Recipe) error {
+func (rs *RecipeStore) UpdateRecipeByID(id models.ModelID, newRecipe models.Recipe) error {
 
 	var oldRecipe models.Recipe
 
 	if err := rs.db.Where("id = ?", id).First(&oldRecipe).Error; err != nil {
-		return fmt.Errorf("Recipe with id: %d not found", id)
+		return fmt.Errorf("Recipe with id: %s not found", id)
 	}
 
 	oldRecipe.CookingTime = newRecipe.CookingTime

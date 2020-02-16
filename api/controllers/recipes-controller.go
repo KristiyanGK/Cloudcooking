@@ -4,7 +4,6 @@ import (
 	"github.com/go-chi/chi"
 	"encoding/json"
 	"github.com/KristiyanGK/cloudcooking/models"
-	"strconv"
 	"github.com/go-playground/validator/v10"
 	"net/http"
 )
@@ -44,16 +43,9 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 //GetRecipeByID GET /recipe/{recipeID}
 func (a *App) GetRecipeByID(w http.ResponseWriter, r *http.Request) {
-	param := chi.URLParam(r, "recipeID")
+	recipeID := models.ModelID(chi.URLParam(r, "recipeID"))
 
-	recipeID, err := strconv.Atoi(param)
-
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid id")
-		return
-	}
-
-	recipe, err := a.RecipeStore.GetRecipeByID(uint(recipeID))
+	recipe, err := a.RecipeStore.GetRecipeByID(recipeID)
 
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, err.Error())
@@ -65,16 +57,9 @@ func (a *App) GetRecipeByID(w http.ResponseWriter, r *http.Request) {
 
 //DeleteRecipe DELETE /api/recipes/{recipeID}
 func (a *App) DeleteRecipe(w http.ResponseWriter, r *http.Request) {	
-	param := chi.URLParam(r, "recipeID")
+	recipeID := models.ModelID(chi.URLParam(r, "recipeID"))
 
-	recipeID, err := strconv.Atoi(param)
-
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid id")
-		return
-	}
-
-	err = a.RecipeStore.DeleteRecipeByID(uint(recipeID))
+	err := a.RecipeStore.DeleteRecipeByID(recipeID)
 
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, err.Error())
@@ -86,18 +71,13 @@ func (a *App) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
 
 //UpdateRecipe PUT /api/recipes/{recipeID}
 func (a *App) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
-	param := chi.URLParam(r, "recipeID")
-
-	recipeID, err := strconv.Atoi(param)
-
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid id")
-		return
-	}
+	recipeID := models.ModelID(chi.URLParam(r, "recipeID"))
 
 	var recipe models.Recipe
 
 	decoder := json.NewDecoder(r.Body)
+
+	var err error
 
 	if err = decoder.Decode(&recipe); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request body")
@@ -106,7 +86,7 @@ func (a *App) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	err = a.RecipeStore.UpdateRecipeByID(uint(recipeID), recipe)
+	err = a.RecipeStore.UpdateRecipeByID(recipeID, recipe)
 
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, err.Error())

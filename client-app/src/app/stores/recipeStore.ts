@@ -1,5 +1,5 @@
 import { RootStore } from "./rootStore";
-import { observable, action, runInAction } from "mobx";
+import { observable, action, runInAction, computed } from "mobx";
 import { IRecipe } from "../models/recipe";
 import agent from "../api/agent";
 import { toast } from 'react-toastify';
@@ -19,24 +19,38 @@ export default class RecipeStore {
     @observable submitting = false;
     @observable target = '';
 
+    @computed get recipesByCategory() {
+      return this.groupRecipesByCategory(Array.from(this.recipeRegistry.values()))
+    }
+
+    groupRecipesByCategory(recipes: IRecipe[]) {
+      const sortedRecipes = recipes.sort();
+
+      return Object.entries(sortedRecipes.reduce((recipes, recipe) => {
+        const category = recipe.category;
+        recipes[category] = recipes[category] ? [...recipes[category], recipe] : [recipe];
+        return recipes;
+      }, {} as {[key: string]: IRecipe[]}));
+    }
+
     @action loadRecipes = async () => {
         this.loadingInitial = true;
         try {
-          const activities = await agent.Recipes.list();
-          runInAction('loading activities', () => {
-            activities.forEach(recipe => {
+          const recipes = await agent.Recipes.list();
+          runInAction('loading recipes', () => {
+            recipes.forEach(recipe => {
               this.recipeRegistry.set(recipe.id, recipe);
             });
             this.loadingInitial = false;
           })
         } catch (error) {
-          runInAction('load activities error', () => {
+          runInAction('load recipes error', () => {
             this.loadingInitial = false;
           })
         }
     };
 
-    @action loadRecipe = async (id: Number) => {
+    @action loadRecipe = async (id: string) => {
         let recipe = this.getRecipe(id);
         if (recipe) {
           this.recipe = recipe;
@@ -64,15 +78,15 @@ export default class RecipeStore {
         this.recipe = null;
     }
 
-    @action createActivity = async (recipe: IRecipe) => {
+    @action createRecipe = async (recipe: IRecipe) => {
         this.submitting = true;
         try {
-          await agent.Recipes.create(recipe);
+          const recipeResult = await agent.Recipes.create(recipe);
           runInAction('create recipe', () => {
-            this.recipeRegistry.set(recipe.id, recipe);
+            this.recipeRegistry.set(recipeResult.id, recipeResult);
             this.submitting = false;
           })
-          history.push(`/recipes/${recipe.id}`)
+          history.push(`/recipes/${recipeResult.id}`)
         } catch (error) {
           runInAction('create recipe error', () => {
             this.submitting = false;
@@ -101,7 +115,7 @@ export default class RecipeStore {
         }
     };
 
-    @action deleteActivity = async (event: SyntheticEvent<HTMLButtonElement>, id: Number) => {
+    @action deleteActivity = async (event: SyntheticEvent<HTMLButtonElement>, id: string) => {
         this.submitting = true;
         this.target = event.currentTarget.name;
         try {
@@ -120,7 +134,7 @@ export default class RecipeStore {
         }
     };
 
-    getRecipe = (id: Number) => {
+    getRecipe = (id: string) => {
         return this.recipeRegistry.get(id);
     }
 }

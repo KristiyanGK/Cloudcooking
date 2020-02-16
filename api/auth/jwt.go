@@ -12,9 +12,7 @@ func GenerateToken(secret string, user models.User) string {
 	expirationTime := time.Now().Add(1 * time.Hour)
 
 	claims := &models.UserToken {
-		ID: user.ID,
 		Username: user.Username,
-		Email: user.Email,
 		Picture: user.Picture,
 		Role: user.Role.Name,
 		StandardClaims: jwt.StandardClaims {

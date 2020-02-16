@@ -4,6 +4,6 @@ package models
 type Comment struct {
 	BaseModel
 	Content string
-	UserID uint
-	RecipeID uint
+	UserID ModelID
+	RecipeID ModelID
 }

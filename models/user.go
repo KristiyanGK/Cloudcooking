@@ -11,17 +11,22 @@ type User struct {
 	Email string `gorm:"unique;not null"`
 	Password string `gorm:"not null"`
 	Picture string
-	RoleID uint
+	RoleID ModelID
 	Role Role
 	Recipes []Recipe
 	Comments []Comment
 }
 
+type UserResult struct {
+	Username string `json:"username"`
+	Picture string `json:"picture"`
+	Role string `json:"userRole"`
+	Token string `json:"token"`
+}
+
 //UserToken is user info in token
 type UserToken struct {
-	ID uint `json:"userid"`
 	Username string `json:"username"`
-	Email string `json:"email"`
 	Picture string `json:"picture"`
 	Role string `json:"userRole"`
 	jwt.StandardClaims

@@ -24,7 +24,7 @@ func NewUserStore() *UserStore {
 func (us *UserStore) AddUser(registerInfo uvm.UserRegisterVM) (models.User, error) {
 	user := models.User{}
 
-	us.db.Where("name = ?", "homecook").First(&user.Role)
+	us.db.Where("name = ?", "HomeCook").First(&user.Role)
 
 	user.Email = registerInfo.Email
 	user.Password = registerInfo.Password

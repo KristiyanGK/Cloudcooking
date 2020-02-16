@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './app/layout/App';
+import 'react-toastify/dist/ReactToastify.min.css';
+import './app/layout/styles.css';
 import * as serviceWorker from './serviceWorker';
 import { Router } from 'react-router-dom';
 import { createBrowserHistory } from "history";
@@ -11,9 +13,9 @@ export const history = createBrowserHistory();
 ReactDOM.render(
     <Router history={history}>
         <ScrollToTop>
-            <App/>
+            <App />
         </ScrollToTop>
-    </Router>, 
+    </Router>,
     document.getElementById('root')
 );
 

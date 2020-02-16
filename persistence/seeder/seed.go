@@ -25,8 +25,7 @@ func Seed() {
 		panic("Cannot get database to seed")
 	}
 
-	//seedRoles()
-	//seedUsers()
+	seedRoles()
 }
 
 func seedRoles() {

@@ -1,8 +1,8 @@
 export interface IUser {
     username: string;
-    displayName: string;
+    role: string;
     token: string;
-    image?: string;
+    picture?: string;
 }
 
 export interface IUserFormValues {

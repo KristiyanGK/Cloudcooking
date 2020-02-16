@@ -74,17 +74,16 @@ const requests = {
 
 const Recipes = {
   list: (): Promise<IRecipe[]> => requests.get("/recipes"),
-  details: (id: Number) => requests.get(`/recipes/${id}`),
-  create: (recipe: IRecipe) => requests.post("/recipes", recipe),
+  details: (id: string) => requests.get(`/recipes/${id}`),
+  create: (recipe: IRecipe) : Promise<IRecipe> => requests.post("/recipes", recipe),
   update: (recipe: IRecipe) =>
     requests.put(`/recipes/${recipe.id}`, recipe),
-  delete: (id: Number) => requests.delete(`/recipes/${id}`)
+  delete: (id: string) => requests.delete(`/recipes/${id}`)
 };
 
 const User = {
-  current: (): Promise<IUser> => requests.get('/user'),
-  login: (user: IUserFormValues): Promise<IUser> => requests.post('/user/login', user),
-  register: (user: IUserFormValues): Promise<IUser> => requests.post('/user/register', user),
+  login: (user: IUserFormValues): Promise<IUser> => requests.post('/login', user),
+  register: (user: IUserFormValues): Promise<IUser> => requests.post('/register', user),
 }
 
 export default {

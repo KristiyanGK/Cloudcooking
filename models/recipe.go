@@ -8,7 +8,7 @@ type Recipe struct {
 	UsedProducts string 
 	Picture string
 	CookingTime int
-	UserID uint
-	CategoryID uint
+	UserID ModelID
+	CategoryID ModelID
 	Comments []Comment
 }
