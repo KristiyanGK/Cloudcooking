@@ -10,5 +10,6 @@ type Recipe struct {
 	CookingTime int
 	UserID ModelID
 	CategoryID ModelID
+	Category Category
 	Comments []Comment
 }

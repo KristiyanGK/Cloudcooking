@@ -43,7 +43,10 @@ func (a *App) Register(w http.ResponseWriter, r *http.Request) {
 	token := auth.GenerateToken(a.APISecret, user)
 
 	result := models.UserResult{
-		user.Username, user.Picture, user.Role.Name, token,
+		Username: user.Username,
+		Picture: user.Picture,
+		Role: user.Role.Name,
+		Token: token,
 	}
 
 	respondWithJSON(w, http.StatusOK, result)
@@ -69,7 +72,10 @@ func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 	token := auth.GenerateToken(a.APISecret, user)
 
 	result := models.UserResult{
-		user.Username, user.Picture, user.Role.Name, token,
+		Username: user.Username,
+		Picture: user.Picture,
+		Role: user.Role.Name,
+		Token: token,
 	}
 
 	respondWithJSON(w, http.StatusOK, result)

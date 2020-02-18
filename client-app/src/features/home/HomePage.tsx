@@ -10,8 +10,6 @@ const HomePage = () => {
     const rootStore = useContext(RootStoreContext);
     const { user, isLoggedIn } = rootStore.userStore;
     const { openModal } = rootStore.modalStore;
-    console.log("user " + user);
-    console.log("isloggedin " + isLoggedIn);
 
     return (
         <Segment inverted textAlign='center' vertical className='mastHead'>

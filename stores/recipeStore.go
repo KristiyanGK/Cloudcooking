@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/KristiyanGK/cloudcooking/models"
 	"github.com/KristiyanGK/cloudcooking/persistence"
+	rvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/recipes"
 	"github.com/jinzhu/gorm"
 )
 
@@ -19,10 +20,18 @@ func NewRecipeStore() *RecipeStore {
 }
 
 // GetAllRecipes returns all recipes from store
-func (rs *RecipeStore) GetAllRecipes() []models.Recipe {
-	var result []models.Recipe
+func (rs *RecipeStore) GetAllRecipes() []rvm.RecipeListVm {
+	var result []rvm.RecipeListVm
 
-	rs.db.Find(&result)
+	rows, _ := rs.db.Table("recipes AS r").Select("r.id, r.title, r.description, r.picture, r.cooking_time, r.used_products, c.name as category").Joins("JOIN categories AS c ON r.category_id = c.id").Rows()
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var recipe rvm.RecipeListVm
+		rs.db.ScanRows(rows, &recipe)
+		result = append(result, recipe)
+	}
 
 	return result
 }

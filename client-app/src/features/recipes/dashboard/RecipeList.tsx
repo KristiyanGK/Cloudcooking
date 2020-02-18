@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import RecipeListItem from './RecipeListItem';
 import { RootStoreContext } from '../../../app/stores/rootStore';
 
-const ActivityList: React.FC = () => {
+const RecipeList: React.FC = () => {
   const rootStore = useContext(RootStoreContext);
   const { recipesByCategory } = rootStore.recipeStore;
   return (
@@ -12,7 +12,7 @@ const ActivityList: React.FC = () => {
       {recipesByCategory.map(([group, recipes]) => (
         <Fragment key={group}>
             <Label size='large' color='blue'>
-                group
+                {group}
             </Label>
             <Item.Group divided>
                 {recipes.map(recipe => (
@@ -25,4 +25,4 @@ const ActivityList: React.FC = () => {
   );
 };
 
-export default observer(ActivityList);
+export default observer(RecipeList);

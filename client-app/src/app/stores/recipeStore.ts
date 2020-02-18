@@ -20,11 +20,12 @@ export default class RecipeStore {
     @observable target = '';
 
     @computed get recipesByCategory() {
-      return this.groupRecipesByCategory(Array.from(this.recipeRegistry.values()))
+      let result = this.groupRecipesByCategory(Array.from(this.recipeRegistry.values()));
+      return result;
     }
 
     groupRecipesByCategory(recipes: IRecipe[]) {
-      const sortedRecipes = recipes.sort();
+      const sortedRecipes = recipes.sort((a, b) => a.category.localeCompare(b.category));
 
       return Object.entries(sortedRecipes.reduce((recipes, recipe) => {
         const category = recipe.category;
@@ -36,7 +37,7 @@ export default class RecipeStore {
     @action loadRecipes = async () => {
         this.loadingInitial = true;
         try {
-          const recipes = await agent.Recipes.list();
+          const recipes = await agent.Recipes.list(); 
           runInAction('loading recipes', () => {
             recipes.forEach(recipe => {
               this.recipeRegistry.set(recipe.id, recipe);
