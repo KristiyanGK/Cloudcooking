@@ -12,7 +12,7 @@ const RecipeListItem: React.FC<{ recipe: IRecipe }> = ({ recipe }) => {
             <Item.Image size='tiny' circular src='/assets/user.png' />
             <Item.Content>
               <Item.Header as='a'>{recipe.title}</Item.Header>
-              <Item.Description>Hosted by Bob</Item.Description>
+                <Item.Description>Cooked by {recipe.user}</Item.Description>
             </Item.Content>
           </Item>
         </Item.Group>
@@ -21,7 +21,7 @@ const RecipeListItem: React.FC<{ recipe: IRecipe }> = ({ recipe }) => {
         <span>{recipe.description}</span>
         <Button
           as={Link}
-          to={`/recipe/${recipe.id}`}
+          to={`/recipes/${recipe.id}`}
           floated='right'
           content='View'
           color='blue'

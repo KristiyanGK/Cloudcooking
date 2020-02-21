@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { history } from "../..";
 import { IRecipe } from "../models/recipe";
 import { IUser, IUserFormValues } from "../models/user";
+import { ICategory } from "../models/category";
 
 axios.defaults.baseURL = "http://localhost:8080/api";
 
@@ -86,7 +87,17 @@ const User = {
   register: (user: IUserFormValues): Promise<IUser> => requests.post('/register', user),
 }
 
+const Categories = {
+  list: (): Promise<ICategory[]> => requests.get("/categories"),
+  details: (id: string) => requests.get(`/categories/${id}`),
+  create: (category: ICategory) : Promise<ICategory> => requests.post("/categories", category),
+  update: (category: ICategory) =>
+    requests.put(`/categories/${category.id}`, category),
+  delete: (id: string) => requests.delete(`/categories/${id}`)
+}
+
 export default {
     Recipes,
-    User
+    User,
+    Categories
 };

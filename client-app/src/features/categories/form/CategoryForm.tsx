@@ -18,7 +18,7 @@ import { RecipeFormValues } from '../../../app/models/recipe';
 
 const validate = combineValidators({
   title: isRequired({ message: 'The recipe title is required' }),
-  categoryId: isRequired('CategoryId'),
+  category: isRequired('Category'),
   description: composeValidators(
     isRequired('Description'),
     hasLengthGreaterThan(4)({
@@ -33,7 +33,7 @@ interface DetailParams {
   id: string;
 }
 
-const RecipeForm: React.FC<RouteComponentProps<DetailParams>> = ({
+const CategoryForm: React.FC<RouteComponentProps<DetailParams>> = ({
   match,
   history
 }) => {
@@ -44,29 +44,23 @@ const RecipeForm: React.FC<RouteComponentProps<DetailParams>> = ({
     submitting,
     loadRecipe
   } = rootStore.recipeStore;
-  const {
-    loadCategories,
-    categoriesAsOptions
-  } = rootStore.categoryStore;
 
   const [recipe, setRecipe] = useState(new RecipeFormValues());
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true)
-    loadCategories().then(() => {
-      if (match.params.id) {
-        loadRecipe(match.params.id)
-          .then(recipe => {
-            setRecipe(new RecipeFormValues(recipe));
-          })
-      }
-    }).finally(() => setLoading(false));
-  }, [loadRecipe, match.params.id, loadCategories]);
+    if (match.params.id) {
+      setLoading(true);
+      loadRecipe(match.params.id)
+        .then(recipe => {
+          setRecipe(new RecipeFormValues(recipe));
+        })
+      .finally(() => setLoading(false));
+    }
+  }, [loadRecipe, match.params.id]);
 
   const handleFinalFormSubmit = (values: any) => {
     const { ...recipe } = values;
-    console.log(values)
     if (!recipe.id) {
       let newRecipe = {
         ...recipe
@@ -102,8 +96,8 @@ const RecipeForm: React.FC<RouteComponentProps<DetailParams>> = ({
                 />
                 <Field
                   component={SelectInput}
-                  options={categoriesAsOptions}
-                  name='categoryId'
+                  options={category}
+                  name='category'
                   placeholder='Category'
                   value={recipe.category}
                 />
@@ -116,8 +110,8 @@ const RecipeForm: React.FC<RouteComponentProps<DetailParams>> = ({
                 />
                 <Field
                   component={TextInput}
-                  name='usedProducts'
-                  placeholder='used Products'
+                  name='used Products'
+                  placeholder='usedProducts'
                   value={recipe.usedProducts}
                 />
                 <Button
@@ -148,4 +142,4 @@ const RecipeForm: React.FC<RouteComponentProps<DetailParams>> = ({
   );
 };
 
-export default observer(RecipeForm);
+export default observer(CategoryForm);

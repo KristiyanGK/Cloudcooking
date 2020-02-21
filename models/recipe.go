@@ -5,9 +5,9 @@ type Recipe struct {
 	BaseModel
 	Title string `gorm:"unique;not null"`
 	Description string 
-	UsedProducts string 
+	UsedProducts string `validate:"required"`
 	Picture string
-	CookingTime int
+	CookingTime int `validate:"required"`
 	UserID ModelID
 	CategoryID ModelID
 	Category Category

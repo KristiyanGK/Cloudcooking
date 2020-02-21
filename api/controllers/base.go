@@ -21,6 +21,7 @@ type App struct {
 	Router *chi.Mux
 	RecipeStore contracts.IRecipeStore
 	UserStore contracts.IUserStore
+	CategoryStore contracts.ICategoryStore
 	Validator  *validator.Validate
 	Translator ut.Translator
 	APISecret string
@@ -46,6 +47,7 @@ func (a *App) Init() {
 
 	a.RecipeStore = stores.NewRecipeStore()
 	a.UserStore = stores.NewUserStore()
+	a.CategoryStore = stores.NewCategoryStore()
 }
 
 //Run starts the rest api server

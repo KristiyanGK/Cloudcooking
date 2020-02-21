@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/KristiyanGK/cloudcooking/api/auth"
 	"github.com/go-chi/chi"
 	"encoding/json"
 	"github.com/KristiyanGK/cloudcooking/models"
@@ -17,6 +18,17 @@ func (a *App) ListRecipes(w http.ResponseWriter, r *http.Request) {
 
 //CreateRecipe POST /api/recipes
 func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	token, ok := ctx.Value("token").(string)
+
+	if !ok {
+		respondWithError(w, http.StatusUnprocessableEntity, "Invalid token")
+		return
+	}
+
+	claims := auth.ParseToken(a.APISecret, token)
+
 	recipe := &models.Recipe{}
 
 	decoder := json.NewDecoder(r.Body)
@@ -35,8 +47,14 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		respondWithValidationError(errs.Translate(a.Translator), w)
 		return
 	}
+	recipe.UserID = models.ModelID(claims.Id)
 
-	a.RecipeStore.AddRecipe(*recipe)
+	_, err = a.RecipeStore.AddRecipe(*recipe)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	w.WriteHeader(http.StatusCreated)
 }

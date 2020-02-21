@@ -26,6 +26,7 @@ type UserResult struct {
 
 //UserToken is user info in token
 type UserToken struct {
+	ID string `json:"id"`
 	Username string `json:"username"`
 	Picture string `json:"picture"`
 	Role string `json:"userRole"`

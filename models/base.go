@@ -9,7 +9,7 @@ type ModelID string
 
 // BaseModel is the base model for all models
 type BaseModel struct {
-	ID ModelID `gorm:"primary_key"`
+	ID ModelID `gorm:"primary_key" json:"id"`
 }
 
 // BeforeCreate hook that creates a uuid for the model

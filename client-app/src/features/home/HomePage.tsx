@@ -12,7 +12,7 @@ const HomePage = () => {
     const { openModal } = rootStore.modalStore;
 
     return (
-        <Segment inverted textAlign='center' vertical className='mastHead'>
+        <Segment inverted textAlign='center' vertical className='masthead'>
             <Container text>
                 <Header as='h1' inverted>
                 <Image

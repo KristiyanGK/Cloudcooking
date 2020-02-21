@@ -23,7 +23,16 @@ func NewRecipeStore() *RecipeStore {
 func (rs *RecipeStore) GetAllRecipes() []rvm.RecipeListVm {
 	var result []rvm.RecipeListVm
 
-	rows, _ := rs.db.Table("recipes AS r").Select("r.id, r.title, r.description, r.picture, r.cooking_time, r.used_products, c.name as category").Joins("JOIN categories AS c ON r.category_id = c.id").Rows()
+	rows, err := rs.db.Table("recipes AS r").Select(`r.id, r.title, r.description, r.picture, r.cooking_time, 
+	r.used_products, c.name AS category, u.username AS user`).
+	Joins("JOIN categories AS c ON r.category_id = c.id").
+	Joins("JOIN users AS u ON r.user_id = u.id").
+	 Rows()
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
 
 	defer rows.Close()
 
@@ -37,19 +46,33 @@ func (rs *RecipeStore) GetAllRecipes() []rvm.RecipeListVm {
 }
 
 // AddRecipe adds recipe to store
-func (rs *RecipeStore) AddRecipe(recipe models.Recipe) models.Recipe {
+func (rs *RecipeStore) AddRecipe(recipe models.Recipe) (models.Recipe, error) {
+	var count int
+
+	rs.db.Table("recipes").Where("title = ?", recipe.Title).Count(&count)
+
+	if (count > 0) {
+		return recipe, fmt.Errorf("Recipe with title %s already exists!", recipe.Title)
+	}
+
 	rs.db.Create(&recipe)
 
-	return recipe
+	return recipe, nil
 }
 
 // GetRecipeByID finds recipe by given id and returns it.
 // Returns error if not found
-func (rs *RecipeStore) GetRecipeByID(id models.ModelID) (models.Recipe, error) {
-	var recipeResult models.Recipe
+func (rs *RecipeStore) GetRecipeByID(id models.ModelID) (rvm.RecipeDetailsVm, error) {
+	recipeResult := rvm.RecipeDetailsVm{}
 
-	if err := rs.db.Where("id = ?", id).First(&recipeResult).Error; err != nil {
-		return models.Recipe{}, fmt.Errorf("Recipe with id: %s not found", id)
+	rs.db.Table("recipes AS r").Select(`r.id, r.title, r.description, r.picture, r.cooking_time, 
+	 r.used_products, c.name AS category, u.username AS user`).
+	 Joins("JOIN categories AS c ON r.category_id = c.id").
+	 Joins("JOIN users AS u ON r.user_id = u.id").
+	 Where("r.id = ?", id).Scan(&recipeResult)
+
+	if recipeResult.ID == "" {
+		return recipeResult, fmt.Errorf("Recipe with id: %s not found", id)
 	}
 
 	return recipeResult, nil

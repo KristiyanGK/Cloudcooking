@@ -122,8 +122,12 @@ func seedRecipes() {
 	var cats []models.Category
 	db.Find(&cats)
 
+	var users []models.User
+	db.Find(&users)
+
 	for i, r := range recipes {
 		r.CategoryID = cats[i % (len(cats))].ID
+		r.UserID = users[i % (len(users))].ID
 		db.Model(&models.Recipe{}).Create(&r)
 	}
 }

@@ -8,8 +8,8 @@ import (
 // IRecipeStore is interface for a recipe store
 type IRecipeStore interface {
 	GetAllRecipes() []rvm.RecipeListVm
-	AddRecipe(recipe models.Recipe) models.Recipe
-	GetRecipeByID(id models.ModelID) (models.Recipe, error)
+	AddRecipe(recipe models.Recipe) (models.Recipe, error)
+	GetRecipeByID(id models.ModelID) (rvm.RecipeDetailsVm, error)
 	DeleteRecipeByID(id models.ModelID) error
 	UpdateRecipeByID(id models.ModelID, newRecipe models.Recipe) error
 }
