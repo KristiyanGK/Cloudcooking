@@ -1,6 +1,6 @@
 import { RootStore } from "./rootStore";
 import { observable, action, runInAction, computed } from "mobx";
-import { IRecipe } from "../models/recipe";
+import { IRecipe, IRecipeEnvelope } from "../models/recipe";
 import agent from "../api/agent";
 import { toast } from 'react-toastify';
 import { history } from '../..';
@@ -60,7 +60,10 @@ export default class RecipeStore {
     @action loadRecipes = async () => {
         this.loadingInitial = true;
         try {
-          const recipesEnvelope = await agent.Recipes.list(LIMIT, this.page);
+          let recipesEnvelope: IRecipeEnvelope;
+
+          recipesEnvelope = await agent.Recipes.list(LIMIT, this.page);
+          
           const { recipes, count } = recipesEnvelope; 
           runInAction('loading recipes', () => {
             recipes.forEach(recipe => {

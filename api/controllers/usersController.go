@@ -69,6 +69,11 @@ func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 
 	user := a.UserStore.GetUserByEmail(loginInfo.Email)
 
+	if user.ID == "" || utils.CheckPasswordHash(loginInfo.Password, user.Password) {
+		respondWithError(w, http.StatusBadRequest, "Invalid credentials")
+		return
+	}
+
 	token := auth.GenerateToken(a.APISecret, user)
 
 	result := models.UserResult{

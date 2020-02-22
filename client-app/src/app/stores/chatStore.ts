@@ -7,24 +7,20 @@ export default class ChatStore {
     
     constructor(rootStore: RootStore) {
         this.rootStore = rootStore;
-    }
-
-    @observable messages: IMessage[] = new Array();
-    ws: WebSocket | null = null
-
-    @action pushMsg = (message: IMessage) => {
-        this.messages.push(message)
-    }
-
-    openConnection = () => {
-        this.ws = new WebSocket("ws://localhost:8080/api/chat?token=" + this.rootStore?.commonStore.token);
 
         this.ws.onmessage = (event) => {
             this.pushMsg(JSON.parse(event.data))
         }
     }
 
+    @observable messages: IMessage[] = new Array();
+    ws: WebSocket = new WebSocket("ws://localhost:8080/api/chat?token=" + this.rootStore?.commonStore.token);
+
+    @action pushMsg = (message: IMessage) => {
+        this.messages.push(message)
+    }
+
     addMessage = (message: IMessage) => {
-        this.ws!.send(JSON.stringify(message))
+        this.ws.send(JSON.stringify(message))
     }
 }

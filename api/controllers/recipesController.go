@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/KristiyanGK/cloudcooking/api/errors"
 	"strconv"
 	"github.com/KristiyanGK/cloudcooking/api/auth"
@@ -33,6 +34,8 @@ func (a *App) ListRecipes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	category := r.URL.Query().Get("category")
+
+	fmt.Println(category);
 
 	recipes, count := a.RecipeStore.GetRecipes(limit, offset, category)
 

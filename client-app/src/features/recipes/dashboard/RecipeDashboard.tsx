@@ -12,6 +12,9 @@ const RecipeDashboard: React.FC = () => {
 
   const rootStore = useContext(RootStoreContext);
   const {loadRecipes, loadingInitial, setPage, page, totalPages} = rootStore.recipeStore;
+  const {
+    loadCategories
+  } = rootStore.categoryStore;
 
   const [loadingNext, setLoadingNext] = useState(false);
 
@@ -22,7 +25,9 @@ const RecipeDashboard: React.FC = () => {
   }
 
   useEffect(() => {
-    loadRecipes();
+    loadRecipes().then(() => {
+      loadCategories()
+    });
   }, [loadRecipes]);
 
   if (loadingInitial && page === 0)
