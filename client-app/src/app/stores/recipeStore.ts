@@ -25,11 +25,11 @@ export default class RecipeStore {
     }
 
     groupRecipesByCategory(recipes: IRecipe[]) {
-      const sortedRecipes = recipes.sort((a, b) => a.category.localeCompare(b.category));
+      const sortedRecipes = recipes.sort((a, b) => a.category.name.localeCompare(b.category.name));
 
       return Object.entries(sortedRecipes.reduce((recipes, recipe) => {
         const category = recipe.category;
-        recipes[category] = recipes[category] ? [...recipes[category], recipe] : [recipe];
+        recipes[category.name] = recipes[category.name] ? [...recipes[category.name], recipe] : [recipe];
         return recipes;
       }, {} as {[key: string]: IRecipe[]}));
     }

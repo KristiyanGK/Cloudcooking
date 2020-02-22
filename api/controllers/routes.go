@@ -24,6 +24,11 @@ func (a *App) RegisterRoutes() {
 	a.Router.Post("/api/login", a.Login)
 	a.Router.Post("/api/register", a.Register)
 
+	a.Router.Route("/api/chat", func(r chi.Router) {
+		r.Use(middlewares.AuthenticationMiddleware)
+		r.HandleFunc("/", a.Chat)
+	})
+
 	a.Router.Route("/api/recipes", func(r chi.Router) {
 		r.Use(middlewares.AuthenticationMiddleware)
 		r.Get("/", a.ListRecipes)
@@ -33,6 +38,11 @@ func (a *App) RegisterRoutes() {
 			r.Get("/", a.GetRecipeByID)
 			r.Put("/", a.UpdateRecipe)
 			r.Delete("/", a.DeleteRecipe)
+
+			r.Route("/comments", func(r chi.Router) {
+				r.Get("/", a.GetRecipeComments)
+				r.Post("/", a.AddComment)
+			})
 		})
 	})
 

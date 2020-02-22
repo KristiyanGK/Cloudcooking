@@ -13,6 +13,7 @@ import NotFound from './NotFound';
 import RecipeDashboard from '../../features/recipes/dashboard/RecipeDashboard';
 import { observer } from 'mobx-react-lite';
 import RecipeDetails from '../../features/recipes/details/RecipeDetails';
+import Chat from '../../features/chat/Chat';
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
   const rootStore = useContext(RootStoreContext);
@@ -45,6 +46,7 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
                       path={["/createRecipe", "/manage/:id"]}
                       component={RecipeForm}
                     />
+                    <Route path='/chat' component={Chat} />
                     <Route path='/login' component={LoginForm} />
                     <Route component={NotFound} />
                   </Switch>

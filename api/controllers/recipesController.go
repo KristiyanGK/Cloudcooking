@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi"
 	"encoding/json"
 	"github.com/KristiyanGK/cloudcooking/models"
+	rvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/recipes"
 	"github.com/go-playground/validator/v10"
 	"net/http"
 )
@@ -13,30 +14,52 @@ import (
 func (a *App) ListRecipes(w http.ResponseWriter, r *http.Request) {
 	recipes := a.RecipeStore.GetAllRecipes()
 
-	respondWithJSON(w, http.StatusOK, recipes)
+	recipesVM := []rvm.RecipesListVm{}
+
+	for _, recipe := range recipes {
+		recipeVM := rvm.RecipesListVm {
+			ID: string(recipe.ID),
+			Title: recipe.Title,
+			Description: recipe.Description,
+			Picture: recipe.Picture,
+			Category: recipe.Category,
+			CookingTime: recipe.CookingTime,
+			UsedProducts: recipe.UsedProducts,
+			User: recipe.User.Username,
+		}
+
+		recipesVM = append(recipesVM, recipeVM)
+	}
+
+	respondWithJSON(w, http.StatusOK, recipesVM)
 }
 
 //CreateRecipe POST /api/recipes
 func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	token, ok := ctx.Value("token").(string)
-
-	if !ok {
-		respondWithError(w, http.StatusUnprocessableEntity, "Invalid token")
-		return
-	}
+	token := ctx.Value("token").(string)
 
 	claims := auth.ParseToken(a.APISecret, token)
 
-	recipe := &models.Recipe{}
+	recipeFormValues := rvm.RecipesFormReceivedVm{}
 
 	decoder := json.NewDecoder(r.Body)
 	var err error
 
-	if err = decoder.Decode(recipe); err != nil {
+	if err = decoder.Decode(&recipeFormValues); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request body")
 		return
+	}
+
+	recipe := &models.Recipe{
+		Title: recipeFormValues.Title,
+		Description: recipeFormValues.Description,
+		Picture: recipeFormValues.Picture,
+		CookingTime: recipeFormValues.CookingTime,
+		CategoryID: models.ModelID(recipeFormValues.CategoryID),
+		UsedProducts: recipeFormValues.UsedProducts,
+		UserID: models.ModelID(claims.UserID),
 	}
 
 	defer r.Body.Close()
@@ -47,16 +70,19 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		respondWithValidationError(errs.Translate(a.Translator), w)
 		return
 	}
-	recipe.UserID = models.ModelID(claims.Id)
 
-	_, err = a.RecipeStore.AddRecipe(*recipe)
+	var createdRecipe models.Recipe
+
+	createdRecipe, err = a.RecipeStore.AddRecipe(*recipe)
 
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	recipeVM := *rvm.NewRecipesDetailsVm(createdRecipe)
+
+	respondWithJSON(w, http.StatusCreated, recipeVM)
 }
 
 //GetRecipeByID GET /recipe/{recipeID}
@@ -70,7 +96,9 @@ func (a *App) GetRecipeByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, recipe)
+	recipeVM := *rvm.NewRecipesDetailsVm(recipe)
+
+	respondWithJSON(w, http.StatusOK, recipeVM)
 }
 
 //DeleteRecipe DELETE /api/recipes/{recipeID}

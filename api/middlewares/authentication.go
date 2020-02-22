@@ -12,18 +12,27 @@ import (
 // if the token is valid loads the token into context
 func AuthenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		const BearerScheme = "Bearer"
+		queryToken := r.URL.Query()["token"]
+		var actualToken string
 
-		tokenHeader := r.Header.Get("Authorization")
+		if len(queryToken) > 0 && auth.IsTokenValid(queryToken[0]) {
+			actualToken = queryToken[0]
+		} else {
+			const BearerScheme = "Bearer"
 
-		tokens := strings.Split(tokenHeader, " ")
+			tokenHeader := r.Header.Get("Authorization")
+	
+			tokens := strings.Split(tokenHeader, " ")
+	
+			if len(tokens) != 2 || tokens[0] != BearerScheme || !auth.IsTokenValid(tokens[1]) {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		if len(tokens) != 2 || tokens[0] != BearerScheme || auth.IsTokenValid(tokens[1]) {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+			actualToken = tokens[1]
 		}
 
-		ctx := context.WithValue(r.Context(), "token", tokens[1])
+		ctx := context.WithValue(r.Context(), "token", actualToken)
 		
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

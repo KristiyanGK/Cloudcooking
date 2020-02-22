@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/KristiyanGK/cloudcooking/models"
 	"github.com/KristiyanGK/cloudcooking/persistence"
-	rvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/recipes"
 	"github.com/jinzhu/gorm"
 )
 
@@ -20,27 +19,13 @@ func NewRecipeStore() *RecipeStore {
 }
 
 // GetAllRecipes returns all recipes from store
-func (rs *RecipeStore) GetAllRecipes() []rvm.RecipeListVm {
-	var result []rvm.RecipeListVm
+func (rs *RecipeStore) GetAllRecipes() []models.Recipe {
+	var result []models.Recipe
 
-	rows, err := rs.db.Table("recipes AS r").Select(`r.id, r.title, r.description, r.picture, r.cooking_time, 
-	r.used_products, c.name AS category, u.username AS user`).
-	Joins("JOIN categories AS c ON r.category_id = c.id").
-	Joins("JOIN users AS u ON r.user_id = u.id").
-	 Rows()
-
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-
-	defer rows.Close()
-
-	for rows.Next() {
-		var recipe rvm.RecipeListVm
-		rs.db.ScanRows(rows, &recipe)
-		result = append(result, recipe)
-	}
+	rs.db.
+	Preload("User").
+	Preload("Category").
+	Find(&result)
 
 	return result
 }
@@ -52,7 +37,7 @@ func (rs *RecipeStore) AddRecipe(recipe models.Recipe) (models.Recipe, error) {
 	rs.db.Table("recipes").Where("title = ?", recipe.Title).Count(&count)
 
 	if (count > 0) {
-		return recipe, fmt.Errorf("Recipe with title %s already exists!", recipe.Title)
+		return recipe, fmt.Errorf("Recipe with title %s already exists", recipe.Title)
 	}
 
 	rs.db.Create(&recipe)
@@ -62,14 +47,14 @@ func (rs *RecipeStore) AddRecipe(recipe models.Recipe) (models.Recipe, error) {
 
 // GetRecipeByID finds recipe by given id and returns it.
 // Returns error if not found
-func (rs *RecipeStore) GetRecipeByID(id models.ModelID) (rvm.RecipeDetailsVm, error) {
-	recipeResult := rvm.RecipeDetailsVm{}
+func (rs *RecipeStore) GetRecipeByID(id models.ModelID) (models.Recipe, error) {
+	recipeResult := models.Recipe{}
 
 	rs.db.Table("recipes AS r").Select(`r.id, r.title, r.description, r.picture, r.cooking_time, 
-	 r.used_products, c.name AS category, u.username AS user`).
+	 r.used_products, c.name, u.username`).
 	 Joins("JOIN categories AS c ON r.category_id = c.id").
 	 Joins("JOIN users AS u ON r.user_id = u.id").
-	 Where("r.id = ?", id).Scan(&recipeResult)
+	 Where("r.id = ?", id).Scan(&recipeResult).Scan(&recipeResult.Category).Scan(&recipeResult.User)
 
 	if recipeResult.ID == "" {
 		return recipeResult, fmt.Errorf("Recipe with id: %s not found", id)

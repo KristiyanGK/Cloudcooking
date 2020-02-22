@@ -7,6 +7,6 @@ import (
 
 // IUserStore is an interface for a user container
 type IUserStore interface {
-	GetUserByUsername(username string) models.User
+	GetUserByEmail(email string) models.User
 	AddUser(registerInfo uvm.UserRegisterVM) (models.User, error)
 }

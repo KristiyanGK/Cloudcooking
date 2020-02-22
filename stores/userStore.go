@@ -35,11 +35,11 @@ func (us *UserStore) AddUser(registerInfo uvm.UserRegisterVM) (models.User, erro
 	return user, nil
 }
 
-// GetUserByUsername receives a username a finds the user by it
-func (us *UserStore) GetUserByUsername(username string) models.User {
+// GetUserByEmail receives a email a finds the user by it
+func (us *UserStore) GetUserByEmail(email string) models.User {
 	var user models.User
 
-	row := us.db.Table("users AS u").Select("u.id, u.username, u.email, u.picture, r.name").Joins("JOIN roles AS r ON u.role_id = r.id").Where("u.username = ?", username).Row()
+	row := us.db.Table("users AS u").Select("u.id, u.username, u.email, u.picture, r.name").Joins("JOIN roles AS r ON u.role_id = r.id").Where("u.email = ?", email).Row()
 
 	var picture sql.NullString
 

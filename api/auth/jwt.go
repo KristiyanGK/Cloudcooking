@@ -12,7 +12,7 @@ func GenerateToken(secret string, user models.User) string {
 	expirationTime := time.Now().Add(1 * time.Hour)
 
 	claims := &models.UserToken {
-		ID: string(user.ID),
+		UserID: string(user.ID),
 		Username: user.Username,
 		Picture: user.Picture,
 		Role: user.Role.Name,
@@ -33,19 +33,15 @@ func GenerateToken(secret string, user models.User) string {
 }
 
 // ParseToken parses a jwt token and returns the user claims
+// It does not check wheater the token is valid or not so use
+// IsTokenValid to ensure the token is valid
 func ParseToken(secret, tokenString string) models.UserToken {
 
-	token, err := jwt.ParseWithClaims(tokenString, &models.UserToken{}, func(token *jwt.Token) (interface{}, error) {
+	token, _ := jwt.ParseWithClaims(tokenString, &models.UserToken{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
 
-	if claims, ok := token.Claims.(*models.UserToken); ok && token.Valid {
-		return *claims
-	} else {
-		fmt.Println(err)
-	}
-
-	return models.UserToken{}
+	return *token.Claims.(*models.UserToken)
 }
 
 // IsTokenValid receives a jwt token in the form of a string and checks wheater the 

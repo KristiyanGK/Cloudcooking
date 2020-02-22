@@ -4,9 +4,9 @@ import (
 	"github.com/KristiyanGK/cloudcooking/models"
 	"github.com/KristiyanGK/cloudcooking/api/auth"
 	"github.com/KristiyanGK/cloudcooking/api/utils"
+	uvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/users"
 	"encoding/json"
 	"net/http"
-	uvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/users"
 )
 
 // Register receives username, password, email, RepeatPassword
@@ -67,7 +67,7 @@ func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 
 	//TODO validate user data
 
-	user := a.UserStore.GetUserByUsername(loginInfo.Username)
+	user := a.UserStore.GetUserByEmail(loginInfo.Email)
 
 	token := auth.GenerateToken(a.APISecret, user)
 

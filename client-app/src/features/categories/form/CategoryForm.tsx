@@ -99,7 +99,7 @@ const CategoryForm: React.FC<RouteComponentProps<DetailParams>> = ({
                   options={category}
                   name='category'
                   placeholder='Category'
-                  value={recipe.category}
+                  value={recipe.category?.name}
                 />
                 <Field
                   component={TextInput}

@@ -52,7 +52,7 @@ const RecipeDetailedHeader: React.FC<IProps> = ({recipe, currUser}) => {
         </Segment>
       </Segment>
       <Segment clearing attached='bottom'>
-        {currUser?.username == recipe.user && 
+        {currUser?.username === recipe.user && 
           <Button as={Link} to={`/manage/${recipe.id}`} color='orange' floated='right'>
             Manage Recipe
           </Button>

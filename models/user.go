@@ -7,14 +7,14 @@ import (
 // User is application user
 type User struct {
 	BaseModel
-	Username string `gorm:"unique;not null"`
-	Email string `gorm:"unique;not null"`
-	Password string `gorm:"not null"`
-	Picture string
-	RoleID ModelID
-	Role Role
-	Recipes []Recipe
-	Comments []Comment
+	Username string `gorm:"unique;not null" json:"username"`
+	Email string `gorm:"unique;not null" json:"email"`
+	Password string `gorm:"not null" json:"password"`
+	Picture string `json:"picture"`
+	RoleID ModelID `json:"roleid"`
+	Role Role `json:"role"`
+	Recipes []Recipe `json:"recipes"`
+	Comments []Comment `json:"comments"`
 }
 
 type UserResult struct {
@@ -26,7 +26,7 @@ type UserResult struct {
 
 //UserToken is user info in token
 type UserToken struct {
-	ID string `json:"id"`
+	UserID string `json:"userid"`
 	Username string `json:"username"`
 	Picture string `json:"picture"`
 	Role string `json:"userRole"`

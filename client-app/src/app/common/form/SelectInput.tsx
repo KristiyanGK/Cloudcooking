@@ -17,6 +17,7 @@ const SelectInput: React.FC<IProps> = ({
     <Form.Field error={touched && !!error} width={width}>
       <Select
         value={input.value}
+        keys={input}
         onChange={(e, data) => input.onChange(data.value)}
         placeholder={placeholder}
         options={options}

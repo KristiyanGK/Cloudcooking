@@ -1,12 +1,10 @@
 package recipes
 
-type RecipeDetailsVm struct {
-	ID string `json:"id"`
+type RecipesFormReceivedVm struct {
 	Title string `json:"title"`
 	Description string `json:"description"`
 	Picture string `json:"picture"`
 	CookingTime int `json:"cookingTime"`
-	Category string `json:"category"`
+	CategoryID string `json:"categoryid"`
 	UsedProducts string `json:"usedProducts"`
-	User string `json:"user"`
 }

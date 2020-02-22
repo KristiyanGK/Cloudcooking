@@ -6,7 +6,6 @@ import { Form as FinalForm, Field } from 'react-final-form';
 import TextInput from '../../../app/common/form/TextInput';
 import TextAreaInput from '../../../app/common/form/TextAreaInput';
 import SelectInput from '../../../app/common/form/SelectInput';
-import { category } from '../../../app/common/options/categoryOptions';
 import {
   combineValidators,
   isRequired,
@@ -66,12 +65,9 @@ const RecipeForm: React.FC<RouteComponentProps<DetailParams>> = ({
 
   const handleFinalFormSubmit = (values: any) => {
     const { ...recipe } = values;
-    console.log(values)
+    recipe.cookingTime = Number(recipe.cookingTime)
     if (!recipe.id) {
-      let newRecipe = {
-        ...recipe
-      };
-      createRecipe(newRecipe);
+      createRecipe(recipe);
     } else {
       editRecipe(recipe);
     }
@@ -105,7 +101,7 @@ const RecipeForm: React.FC<RouteComponentProps<DetailParams>> = ({
                   options={categoriesAsOptions}
                   name='categoryId'
                   placeholder='Category'
-                  value={recipe.category}
+                  value={recipe.category?.name}
                 />
                 <Field
                   component={TextInput}

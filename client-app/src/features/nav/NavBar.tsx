@@ -28,6 +28,7 @@ const NavBar: React.FC = () => {
             content="Create Recipe"
           />
         </Menu.Item>
+        <Menu.Item name="Chat" as={NavLink} to="/chat"></Menu.Item>
         {user && (
           <Menu.Item position='right'>
             <Image avatar spaced='right' src={user.picture || '/assets/user.png'} />
