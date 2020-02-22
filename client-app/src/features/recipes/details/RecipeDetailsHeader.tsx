@@ -27,13 +27,7 @@ const RecipeDetailedHeader: React.FC<IProps> = ({recipe, currUser}) => {
 
   return (
     <Segment.Group>
-      <Segment basic attached='top' style={{ padding: '0' }}>
-        <Image
-          src={`/assets/categoryImages/${recipe.category}.jpg`}
-          alt='temp'
-          fluid
-          style={recipeImageStyle}
-        />
+      <Segment basic attached='top' style={{ padding: '0', marginTop: 20 }}>
         <Segment style={recipeImageTextStyle} basic>
           <Item.Group>
             <Item>

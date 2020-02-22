@@ -1,29 +1,49 @@
-import React, { useContext, useEffect } from 'react';
-import { Grid } from 'semantic-ui-react';
+import React, { useContext, useEffect, useState } from 'react';
+import { Grid, Loader } from 'semantic-ui-react';
 import RecipeList from './RecipeList';
 import { observer } from 'mobx-react-lite';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
 import { RootStoreContext } from '../../../app/stores/rootStore';
+import InfiniteScroll from 'react-infinite-scroller'
+import RecipeFilters from './RecipeFilters';
+
 
 const RecipeDashboard: React.FC = () => {
 
   const rootStore = useContext(RootStoreContext);
-  const {loadRecipes, loadingInitial} = rootStore.recipeStore;
+  const {loadRecipes, loadingInitial, setPage, page, totalPages} = rootStore.recipeStore;
+
+  const [loadingNext, setLoadingNext] = useState(false);
+
+  const handleGetNext = () => {
+    setLoadingNext(true);
+    setPage(page + 1);
+    loadRecipes().then(() => setLoadingNext(false))
+  }
 
   useEffect(() => {
     loadRecipes();
   }, [loadRecipes]);
 
-  if (loadingInitial)
+  if (loadingInitial && page === 0)
     return <LoadingComponent content='Loading recipes' />;
 
   return (
     <Grid>
       <Grid.Column width={10}>
-        <RecipeList />
+        <InfiniteScroll
+            pageStart={0}
+            loadMore={handleGetNext}
+            hasMore={!loadingNext && page + 1 < totalPages}
+            initialLoad={false}>
+          <RecipeList />
+        </InfiniteScroll>
       </Grid.Column>
       <Grid.Column width={6}>
-        <h2>Recipe filters</h2>
+        <RecipeFilters/>
+      </Grid.Column>
+      <Grid.Column width={10}>
+        <Loader active={loadingNext}/>
       </Grid.Column>
     </Grid>
   );

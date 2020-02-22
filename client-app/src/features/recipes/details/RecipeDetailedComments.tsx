@@ -1,7 +1,39 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Segment, Header, Form, Button, Comment } from 'semantic-ui-react';
+import { RootStoreContext } from '../../../app/stores/rootStore';
+import { observer } from 'mobx-react-lite';
+import { Form as FinalForm, Field } from 'react-final-form';
+import LoadingComponent from '../../../app/layout/LoadingComponent';
+import TextInput from '../../../app/common/form/TextInput';
+import { combineValidators, isRequired } from 'revalidate';
 
-const RecipeDetailedComments = () => {
+interface IProps {
+  recipeId: string
+}
+
+const validate = combineValidators({
+  content: isRequired({ message: 'The comment content is required' })
+});
+
+const RecipeDetailedComments: React.FC<IProps> = ({recipeId}) => {
+  const rootStore = useContext(RootStoreContext);
+
+  const { comments, loadingComments, loadComments, createComment, submitting } = rootStore.commentStore;
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    loadComments(recipeId).finally(() => setLoading(false));
+  }, [loadComments, recipeId]);
+
+  const handleFinalFormSubmit = (values: any) => {
+    const { ...comment } = values;
+    createComment(comment, recipeId)
+  };
+
+  if (loadingComments) return (<LoadingComponent content="Loading Comments..."/>)
+
   return (
     <Fragment>
       <Segment
@@ -11,45 +43,47 @@ const RecipeDetailedComments = () => {
         color='teal'
         style={{ border: 'none' }}
       >
-        <Header>Chat about this event</Header>
+      <Header>Comments</Header>
       </Segment>
       <Segment attached>
         <Comment.Group>
-          <Comment>
+          {comments && comments.map((comment) => (
+            <Comment key={comment.id}>
             <Comment.Avatar src='/assets/user.png' />
             <Comment.Content>
-              <Comment.Author as='a'>Matt</Comment.Author>
+              <Comment.Author>{comment.user}</Comment.Author>
               <Comment.Metadata>
-                <div>Today at 5:42PM</div>
+                <div>Today at 5:43PM</div>
               </Comment.Metadata>
-              <Comment.Text>How artistic!</Comment.Text>
+              <Comment.Text>{comment.content}</Comment.Text>
             </Comment.Content>
           </Comment>
+          ))}
+        </Comment.Group>
 
-          <Comment>
-            <Comment.Avatar src='/assets/user.png' />
-            <Comment.Content>
-              <Comment.Author as='a'>Joe Henderson</Comment.Author>
-              <Comment.Metadata>
-                <div>5 days ago</div>
-              </Comment.Metadata>
-              <Comment.Text>Dude, this is awesome. Thanks so much</Comment.Text>
-            </Comment.Content>
-          </Comment>
-
-          <Form reply>
-            <Form.TextArea />
+        <FinalForm
+          onSubmit={handleFinalFormSubmit}
+          render={({ handleSubmit, invalid, pristine }) => (
+          <Form reply onSubmit={handleSubmit} loading={loading}>
+            <Field
+                name='content'
+                placeholder='Content goes here...'
+                component={TextInput}
+            />
             <Button
               content='Add Reply'
+              loading={submitting}
+              disabled={loading || invalid || pristine}
               labelPosition='left'
               icon='edit'
               primary
             />
           </Form>
-        </Comment.Group>
+          )}
+          />
       </Segment>
     </Fragment>
   );
 };
 
-export default RecipeDetailedComments;
+export default observer(RecipeDetailedComments);

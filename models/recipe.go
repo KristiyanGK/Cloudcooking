@@ -1,5 +1,9 @@
 package models
 
+import (
+	"time"
+)
+
 // Recipe defines a cooking recipe
 type Recipe struct {
 	BaseModel
@@ -13,4 +17,5 @@ type Recipe struct {
 	CategoryID ModelID `json:"categoryid"`
 	Category Category `json:"category"`
 	Comments []Comment `json:"comments"`
+	CreatedAt time.Time `json:"createdAt"`
 }

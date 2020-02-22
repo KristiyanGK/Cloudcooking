@@ -1,6 +1,7 @@
 package recipes
 
 import (
+	"time"
 	"github.com/KristiyanGK/cloudcooking/models"
 )
 
@@ -13,6 +14,7 @@ type RecipesDetailsVm struct {
 	Category models.Category `json:"category"`
 	UsedProducts string `json:"usedProducts"`
 	User string `json:"user"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 func NewRecipesDetailsVm(recipe models.Recipe) *RecipesDetailsVm {
@@ -25,5 +27,6 @@ func NewRecipesDetailsVm(recipe models.Recipe) *RecipesDetailsVm {
 		Category: recipe.Category,
 		UsedProducts: recipe.UsedProducts,
 		User: recipe.User.Username,
+		CreatedAt: recipe.CreatedAt,
 	}
 }

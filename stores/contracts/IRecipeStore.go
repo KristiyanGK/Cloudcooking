@@ -6,7 +6,7 @@ import (
 
 // IRecipeStore is interface for a recipe store
 type IRecipeStore interface {
-	GetAllRecipes() []models.Recipe
+	GetRecipes(limit, offset int, category string) ([]models.Recipe, int)
 	AddRecipe(recipe models.Recipe) (models.Recipe, error)
 	GetRecipeByID(id models.ModelID) (models.Recipe, error)
 	DeleteRecipeByID(id models.ModelID) error

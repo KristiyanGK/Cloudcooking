@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import { history } from '../..';
 import { SyntheticEvent } from "react";
 
+const LIMIT = 4;
+
 export default class RecipeStore {
     rootStore: RootStore; 
 
@@ -18,10 +20,31 @@ export default class RecipeStore {
     @observable loadingInitial = false;
     @observable submitting = false;
     @observable target = '';
+    @observable recipeCount = 0;
+    @observable page = 0;
 
-    @computed get recipesByCategory() {
-      let result = this.groupRecipesByCategory(Array.from(this.recipeRegistry.values()));
+    @computed get totalPages() {
+      return Math.ceil(this.recipeCount / LIMIT);
+    }
+
+    @action setPage = (page: number) => {
+      this.page = page;
+    }
+
+    @computed get recipesByDate() {
+      let result = this.groupRecipesByDate(Array.from(this.recipeRegistry.values()));
       return result;
+    }
+
+    groupRecipesByDate(recipes: IRecipe[]) {
+      const sortedRecipes = recipes.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      )
+      return Object.entries(sortedRecipes.reduce((recipes, recipe) => {
+        const date = recipe.createdAt.toISOString().split('T')[0];
+        recipes[date] = recipes[date] ? [...recipes[date], recipe] : [recipe];
+        return recipes;
+      }, {} as {[key: string]: IRecipe[]}));
     }
 
     groupRecipesByCategory(recipes: IRecipe[]) {
@@ -37,11 +60,14 @@ export default class RecipeStore {
     @action loadRecipes = async () => {
         this.loadingInitial = true;
         try {
-          const recipes = await agent.Recipes.list(); 
+          const recipesEnvelope = await agent.Recipes.list(LIMIT, this.page);
+          const { recipes, count } = recipesEnvelope; 
           runInAction('loading recipes', () => {
             recipes.forEach(recipe => {
+              recipe.createdAt = new Date(recipe.createdAt)
               this.recipeRegistry.set(recipe.id, recipe);
             });
+            this.recipeCount = count;
             this.loadingInitial = false;
           })
         } catch (error) {
@@ -61,6 +87,7 @@ export default class RecipeStore {
           try {
             recipe = await agent.Recipes.details(id);
             runInAction('getting recipe',() => {
+              recipe.createdAt = new Date(recipe.createdAt)
               this.recipe = recipe;
               this.recipeRegistry.set(recipe.id, recipe);
               this.loadingInitial = false;
@@ -116,7 +143,7 @@ export default class RecipeStore {
         }
     };
 
-    @action deleteActivity = async (event: SyntheticEvent<HTMLButtonElement>, id: string) => {
+    @action deleteRecipe = async (event: SyntheticEvent<HTMLButtonElement>, id: string) => {
         this.submitting = true;
         this.target = event.currentTarget.name;
         try {

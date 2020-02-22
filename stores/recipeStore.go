@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/KristiyanGK/cloudcooking/models"
 	"github.com/KristiyanGK/cloudcooking/persistence"
+	"github.com/KristiyanGK/cloudcooking/api/errors"
 	"github.com/jinzhu/gorm"
 )
 
@@ -18,16 +19,34 @@ func NewRecipeStore() *RecipeStore {
 	return &RecipeStore{persistence.GetDb()}
 }
 
-// GetAllRecipes returns all recipes from store
-func (rs *RecipeStore) GetAllRecipes() []models.Recipe {
-	var result []models.Recipe
+// GetRecipes returns limit recipes from the the store with given offset
+// and total count of recipes
+func (rs *RecipeStore) GetRecipes(limit, offset int, category string) ([]models.Recipe, int) {
+	var count int
 
-	rs.db.
-	Preload("User").
-	Preload("Category").
-	Find(&result)
+	rs.db.Model(&models.Recipe{}).Count(&count)
 
-	return result
+	var recipes []models.Recipe
+
+	if category != "" {
+		rs.db.
+		Offset(offset).
+		Limit(limit).
+		Order("created_at").
+		Preload("User").
+		Preload("Category").
+		Where("category_id = ?", category).
+		Find(&recipes)
+	} else {
+		rs.db.
+		Offset(offset).
+		Limit(limit).
+		Preload("User").
+		Preload("Category").
+		Find(&recipes)
+	}
+
+	return recipes, count
 }
 
 // AddRecipe adds recipe to store
@@ -80,7 +99,11 @@ func (rs *RecipeStore) UpdateRecipeByID(id models.ModelID, newRecipe models.Reci
 	var oldRecipe models.Recipe
 
 	if err := rs.db.Where("id = ?", id).First(&oldRecipe).Error; err != nil {
-		return fmt.Errorf("Recipe with id: %s not found", id)
+		return &errors.StatusError{Code: 404, Err: fmt.Errorf("Recipe with id: %s not found", id)}
+	}
+
+	if oldRecipe.UserID != newRecipe.UserID{
+		return &errors.StatusError{Code: 403, Err: fmt.Errorf("Cannot change recipes that do not belong to you")}
 	}
 
 	oldRecipe.CookingTime = newRecipe.CookingTime

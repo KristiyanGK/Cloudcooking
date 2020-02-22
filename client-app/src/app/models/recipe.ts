@@ -1,5 +1,10 @@
 import { ICategory } from "./category";
 
+export interface IRecipeEnvelope {
+    recipes: IRecipe[];
+    count: number;
+}
+
 export interface IRecipe {
     id: string;
     title: string;
@@ -9,6 +14,7 @@ export interface IRecipe {
     category: ICategory;
     categoryId: string;
     user?: string;
+    createdAt: Date;
 }
 
 export interface IRecipeFormValues extends Partial<IRecipe> {

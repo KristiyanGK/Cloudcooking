@@ -33,7 +33,7 @@ const RecipeDetails: React.FC<RouteComponentProps<DetailParams>> = ({
             <Grid.Column>
                 <RecipeDetailsHeader recipe={recipe} currUser={user}/>
                 <RecipeDetailedInfo recipe={recipe}/>
-                <RecipeDetailedComments/>
+                <RecipeDetailedComments recipeId={recipe.id}/>
             </Grid.Column>
         </Grid>
     )

@@ -3,16 +3,17 @@ import { Item, Label } from 'semantic-ui-react';
 import { observer } from 'mobx-react-lite';
 import RecipeListItem from './RecipeListItem';
 import { RootStoreContext } from '../../../app/stores/rootStore';
+import {format} from 'date-fns';
 
 const RecipeList: React.FC = () => {
   const rootStore = useContext(RootStoreContext);
-  const { recipesByCategory } = rootStore.recipeStore;
+  const { recipesByDate } = rootStore.recipeStore;
   return (
     <Fragment>
-      {recipesByCategory.map(([group, recipes]) => (
+      {recipesByDate.map(([group, recipes]) => (
         <Fragment key={group}>
             <Label size='large' color='blue'>
-                {group}
+              {format(Date.parse(group), 'eeee do MMMM')}
             </Label>
             <Item.Group divided>
                 {recipes.map(recipe => (

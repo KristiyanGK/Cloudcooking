@@ -22,6 +22,7 @@ type App struct {
 	RecipeStore contracts.IRecipeStore
 	UserStore contracts.IUserStore
 	CategoryStore contracts.ICategoryStore
+	CommentStore contracts.ICommentStore
 	Validator  *validator.Validate
 	Translator ut.Translator
 	APISecret string
@@ -48,6 +49,7 @@ func (a *App) Init() {
 	a.RecipeStore = stores.NewRecipeStore()
 	a.UserStore = stores.NewUserStore()
 	a.CategoryStore = stores.NewCategoryStore()
+	a.CommentStore = stores.NewCommentStore()
 }
 
 //Run starts the rest api server

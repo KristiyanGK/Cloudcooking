@@ -8,8 +8,10 @@ import { RootStoreContext } from '../../app/stores/rootStore';
 const Chat = () => {
     const rootStore = useContext(RootStoreContext);
 
-    const { addMessage, messages } = rootStore.chatStore;
+    const { addMessage, messages, openConnection } = rootStore.chatStore;
     const { user } = rootStore.userStore;
+
+    openConnection();
 
     const handleFinalFormSubmit = (values: any) => {
         const { ...message } = values;

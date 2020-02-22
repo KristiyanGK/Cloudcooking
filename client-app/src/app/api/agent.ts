@@ -1,9 +1,10 @@
 import axios, { AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { history } from "../..";
-import { IRecipe } from "../models/recipe";
+import { IRecipe, IRecipeEnvelope } from "../models/recipe";
 import { IUser, IUserFormValues } from "../models/user";
 import { ICategory } from "../models/category";
+import { IComment } from "../models/comment";
 
 axios.defaults.baseURL = "http://localhost:8080/api";
 
@@ -16,8 +17,6 @@ axios.interceptors.request.use((config) => {
 }, error => {
   return Promise.reject(error)
 })
-
-
 
 axios.interceptors.response.use(undefined, error => {
   if (error.message === "Network Error" && !error.response) {
@@ -76,7 +75,7 @@ const requests = {
 };
 
 const Recipes = {
-  list: (): Promise<IRecipe[]> => requests.get("/recipes"),
+  list: (limit?: number, page?: number): Promise<IRecipeEnvelope> => requests.get(`/recipes?limit=${limit}&offset=${page ? page * limit! : 0}`),
   details: (id: string) => requests.get(`/recipes/${id}`),
   create: (recipe: IRecipe) : Promise<IRecipe> => requests.post("/recipes", recipe),
   update: (recipe: IRecipe) =>
@@ -98,8 +97,14 @@ const Categories = {
   delete: (id: string) => requests.delete(`/categories/${id}`)
 }
 
+const Comments = {
+  list: (recipeId: string): Promise<IComment[]> => requests.get(`/recipes/${recipeId}/comments`),
+  create: (comment: IComment, recipeId: string): Promise<IComment> => requests.post(`/recipes/${recipeId}/comments`, comment)
+}
+
 export default {
     Recipes,
     User,
-    Categories
+    Categories,
+    Comments
 };

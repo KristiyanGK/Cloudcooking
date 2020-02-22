@@ -1,34 +1,49 @@
 package controllers
 
 import (
+	"github.com/KristiyanGK/cloudcooking/api/errors"
+	"strconv"
 	"github.com/KristiyanGK/cloudcooking/api/auth"
 	"github.com/go-chi/chi"
 	"encoding/json"
 	"github.com/KristiyanGK/cloudcooking/models"
 	rvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/recipes"
+	cvm "github.com/KristiyanGK/cloudcooking/api/viewmodels/comments"
 	"github.com/go-playground/validator/v10"
 	"net/http"
 )
 
 //ListRecipes GET /api/recipes
 func (a *App) ListRecipes(w http.ResponseWriter, r *http.Request) {
-	recipes := a.RecipeStore.GetAllRecipes()
 
-	recipesVM := []rvm.RecipesListVm{}
+	limitStr := r.URL.Query().Get("limit")
+
+	limit, err := strconv.Atoi(limitStr)
+
+	if err != nil {
+		limit = 5
+	}
+
+	offsetSTR := r.URL.Query().Get("offset")
+
+	offset, err := strconv.Atoi(offsetSTR)
+
+	if err != nil {
+		offset = 0
+	}
+
+	category := r.URL.Query().Get("category")
+
+	recipes, count := a.RecipeStore.GetRecipes(limit, offset, category)
+
+	recipesVM := rvm.RecipesListVm{}
+
+	recipesVM.Count = count
 
 	for _, recipe := range recipes {
-		recipeVM := rvm.RecipesListVm {
-			ID: string(recipe.ID),
-			Title: recipe.Title,
-			Description: recipe.Description,
-			Picture: recipe.Picture,
-			Category: recipe.Category,
-			CookingTime: recipe.CookingTime,
-			UsedProducts: recipe.UsedProducts,
-			User: recipe.User.Username,
-		}
+		recipeVM := rvm.NewRecipesListItemVm(recipe)
 
-		recipesVM = append(recipesVM, recipeVM)
+		recipesVM.Recipes = append(recipesVM.Recipes, recipeVM)
 	}
 
 	respondWithJSON(w, http.StatusOK, recipesVM)
@@ -119,23 +134,45 @@ func (a *App) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
 func (a *App) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 	recipeID := models.ModelID(chi.URLParam(r, "recipeID"))
 
-	var recipe models.Recipe
-
 	decoder := json.NewDecoder(r.Body)
+
+	recipeFormValues := rvm.RecipesFormReceivedVm{}
 
 	var err error
 
-	if err = decoder.Decode(&recipe); err != nil {
+	if err = decoder.Decode(&recipeFormValues); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
+	ctx := r.Context()
+
+	token := ctx.Value("token").(string)
+
+	claims := auth.ParseToken(a.APISecret, token)
+
+	recipe := &models.Recipe{
+		Title: recipeFormValues.Title,
+		Description: recipeFormValues.Description,
+		Picture: recipeFormValues.Picture,
+		CookingTime: recipeFormValues.CookingTime,
+		CategoryID: models.ModelID(recipeFormValues.CategoryID),
+		UsedProducts: recipeFormValues.UsedProducts,
+		UserID: models.ModelID(claims.UserID),
+	}
+
 	defer r.Body.Close()
 
-	err = a.RecipeStore.UpdateRecipeByID(recipeID, recipe)
+	err = a.RecipeStore.UpdateRecipeByID(recipeID, *recipe)
 
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, err.Error())
+		
+		switch e := err.(type) {
+			case errors.StatusError:
+				respondWithError(w, e.Code, e.Err.Error())
+			default:
+				respondWithError(w, http.StatusInternalServerError, e.Error())
+		}
 		return
 	}
 
@@ -144,10 +181,61 @@ func (a *App) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 
 //GetRecipeComments GET /api/recipes/{recipeID}/comments
 func (a *App) GetRecipeComments(w http.ResponseWriter, r *http.Request) {
+	recipeID := models.ModelID(chi.URLParam(r, "recipeID"))
 
+	comments := a.CommentStore.GetRecipeComments(recipeID)
+
+	commentsVM := []cvm.CommentResponseVm{}
+
+	for _, c := range comments {
+		commentVM := cvm.CommentResponseVm {
+			ID: string(c.BaseModel.ID),
+			Content: c.Content,
+			CreatedAt: c.CreatedAt,
+			User: c.User.Username,
+		}
+
+		commentsVM = append(commentsVM, commentVM)
+	}
+
+	respondWithJSON(w, http.StatusOK, commentsVM)
 }
 
 //AddComment POST /api/recipes/{recipeID}/comments
 func (a *App) AddComment(w http.ResponseWriter, r *http.Request) {
-	
+	var commentVM cvm.CommentFormReceivedVm
+
+	decoder := json.NewDecoder(r.Body)
+
+	var err error
+
+	if err = decoder.Decode(&commentVM); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	ctx := r.Context()
+
+	token := ctx.Value("token").(string)
+
+	recipeID := models.ModelID(chi.URLParam(r, "recipeID"))
+
+	claims := auth.ParseToken(a.APISecret, token)
+
+	comment := models.Comment {
+		Content: commentVM.Content,
+		RecipeID: recipeID,
+		UserID: models.ModelID(claims.UserID),
+	}
+
+	commentResult := a.CommentStore.AddComment(comment)
+
+	commentResultVM := cvm.CommentResponseVm {
+		ID: string(commentResult.BaseModel.ID),
+		Content: commentResult.Content,
+		CreatedAt: commentResult.CreatedAt,
+		User: claims.Username,
+	}
+
+	respondWithJSON(w, http.StatusCreated, commentResultVM)
 }
