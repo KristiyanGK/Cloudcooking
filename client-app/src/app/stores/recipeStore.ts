@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { history } from '../..';
 import { SyntheticEvent } from "react";
 
-const LIMIT = 4;
+const LIMIT = 3;
 
 export default class RecipeStore {
     rootStore: RootStore; 
